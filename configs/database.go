@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/Leeroyakbar/bowlnow-backend/models"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -38,14 +37,26 @@ func InitDB() {
 	DB = db
 	fmt.Println("Connected to database")
 
-	DB.AutoMigrate(
-		&models.Role{},
-		&models.User{},
-		&models.Category{},
-		&models.Food{},
-		&models.TransactionDetail{},
-		&models.PaymentMethod{},
-		&models.Transaction{},
-	)
+	// Hapus tabel-tabel lama dulu (optional)
+	// db.Migrator().DropTable(
+	// 	&models.TransactionDetail{},
+	// 	&models.Transaction{},
+	// 	&models.PaymentMethod{},
+	// 	&models.Food{},
+	// 	&models.Category{},
+	// 	&models.User{},
+	// 	&models.Role{},
+	// )
+
+	// // Migrasi ulang dengan model yang sudah diperbaiki
+	// db.AutoMigrate(
+	// 	&models.Role{},
+	// 	&models.User{},
+	// 	&models.Category{},
+	// 	&models.Food{},
+	// 	&models.TransactionDetail{},
+	// 	&models.PaymentMethod{},
+	// 	&models.Transaction{},
+	// )
 
 }

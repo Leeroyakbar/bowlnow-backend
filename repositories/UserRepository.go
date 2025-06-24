@@ -36,7 +36,11 @@ func (repo *userRepository) FindById(id uuid.UUID) (*models.User, error) {
 
 func (repo *userRepository) FindByUserName(userName string) (*models.User, error) {
 	var user models.User
-	err := repo.db.Where("user_name = ?", userName).First(&user).Error
+	err := repo.db.
+		Preload("Role"). 
+		Where("user_name = ?", userName).
+		First(&user).Error
+
 	return &user, err
 }
 

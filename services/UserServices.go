@@ -9,6 +9,7 @@ import (
 	"github.com/Leeroyakbar/bowlnow-backend/dto"
 	"github.com/Leeroyakbar/bowlnow-backend/models"
 	"github.com/Leeroyakbar/bowlnow-backend/repositories"
+	"github.com/Leeroyakbar/bowlnow-backend/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -17,6 +18,7 @@ import (
 
 type UserService interface {
 	RegisterFromForm(c *fiber.Ctx) (*dto.RegisterResponse, error)
+	Login(userName string, password string) (*dto.LoginResponse, error)
 	GetById(id uuid.UUID) (*models.User, error)
 	GetByUserName(userName string) (*models.User, error)
 	GetAll() ([]models.User, error)
@@ -89,6 +91,33 @@ func (s *userService) RegisterFromForm(c *fiber.Ctx) (*dto.RegisterResponse, err
 		UserName: user.UserName,
 	}
 	return res, s.repo.Create(user)
+}
+
+func (service *userService) Login(userName string, password string) (*dto.LoginResponse, error) {
+	user, err := service.repo.FindByUserName(userName)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	// compare hashing password from db
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return nil, errors.New("invalid password")
+	}
+
+	// generate token
+	token, err := utils.GenerateJWT(user.UserID, user.Role.RoleName)
+	if err != nil {
+		return nil, errors.New("failed to generate token")
+	}
+
+	res := &dto.LoginResponse{
+		UserID:   user.UserID,
+		UserName: user.UserName,
+		FullName: user.FullName,
+		RoleName: user.Role.RoleName,
+		Token:    token,
+	}
+	return res, nil
 }
 
 func (service *userService) GetById(id uuid.UUID) (*models.User, error) {

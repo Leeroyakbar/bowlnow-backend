@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/Leeroyakbar/bowlnow-backend/dto"
 	"github.com/Leeroyakbar/bowlnow-backend/services"
 	"github.com/Leeroyakbar/bowlnow-backend/utils"
 	"github.com/gofiber/fiber/v2"
@@ -31,4 +32,19 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
 	}
 
 	return utils.SuccessResponse(c, user, "User registered successfully")
+}
+
+func (h *UserHandler) Login(c *fiber.Ctx) error {
+	var req dto.LoginRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return utils.ErrorResponse(c, fiber.StatusBadRequest, 4001, "Invalid request body")
+	}
+
+	res, err := h.userService.Login(req.UserName, req.Password) 
+	if err != nil {
+		return utils.ErrorResponse(c, fiber.StatusUnauthorized, 4002, err.Error())
+	}
+
+	return utils.SuccessResponse(c, res, "Login successful")
 }
